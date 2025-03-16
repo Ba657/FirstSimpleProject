@@ -49,11 +49,20 @@
 
         .shape {
             position: absolute;
+        }
+
+        .triangle {
+            width: 0;
+            height: 0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-bottom: 50px solid #32CD32;
+        }
+
+        .square {
             width: 50px;
             height: 50px;
-            background-color: #9400D3;
-            border-radius: 50%;
-            box-shadow: 0 0 20px #9400D3, 0 0 40px #9400D3, 0 0 60px #FF00FF;
+            background-color: #FFD700;
         }
     </style>
 </head>
@@ -89,6 +98,11 @@
         function createShape() {
             const shape = document.createElement("div");
             shape.classList.add("shape");
+            shape.style.width = "50px";
+            shape.style.height = "50px";
+            shape.style.backgroundColor = "#9400D3";
+            shape.style.borderRadius = "50%";
+            shape.style.boxShadow = "0 0 20px #9400D3, 0 0 40px #9400D3, 0 0 60px #FF00FF";
             shape.style.left = `${Math.random() * (container.clientWidth - 50)}px`;
             shape.style.top = `${Math.random() * (container.clientHeight - 50)}px`;
 
@@ -100,18 +114,31 @@
             updateCounters();
         }
 
-        function createOctagon() {
-            const octagon = document.createElement("div");
-            octagon.classList.add("shape");
-            octagon.style.clipPath = "polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)";
-            octagon.style.left = `${Math.random() * (container.clientWidth - 50)}px`;
-            octagon.style.top = `${Math.random() * (container.clientHeight - 50)}px`;
+        function createTriangle() {
+            const triangle = document.createElement("div");
+            triangle.classList.add("shape", "triangle");
+            triangle.style.left = `${Math.random() * (container.clientWidth - 50)}px`;
+            triangle.style.top = `${Math.random() * (container.clientHeight - 50)}px`;
 
             const xSpeed = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 4 + 1);
             const ySpeed = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 4 + 1);
 
-            container.appendChild(octagon);
-            shapes.push({ element: octagon, xSpeed, ySpeed });
+            container.appendChild(triangle);
+            shapes.push({ element: triangle, xSpeed, ySpeed });
+            updateCounters();
+        }
+
+        function createSquare() {
+            const square = document.createElement("div");
+            square.classList.add("shape", "square");
+            square.style.left = `${Math.random() * (container.clientWidth - 50)}px`;
+            square.style.top = `${Math.random() * (container.clientHeight - 50)}px`;
+
+            const xSpeed = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 4 + 1);
+            const ySpeed = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 4 + 1);
+
+            container.appendChild(square);
+            shapes.push({ element: square, xSpeed, ySpeed });
             updateCounters();
         }
 
@@ -168,16 +195,13 @@
         });
 
         document.getElementById("shapeShifterButton").addEventListener("click", () => {
-            // Existing shapes change shape
             shapes.forEach(shapeData => {
                 const shape = shapeData.element;
                 shape.style.borderRadius = Math.random() > 0.5 ? "0" : "50%";
             });
 
-            // Add new octagons
-            for (let i = 0; i < 3; i++) { // Adds 3 new octagons each time Shape Shifter is triggered
-                createOctagon();
-            }
+            for (let i = 0; i < 2; i++) createTriangle();
+            for (let i = 0; i < 2; i++) createSquare();
         });
 
         document.getElementById("partyModeButton").addEventListener("click", () => {
