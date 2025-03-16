@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Physics Playground</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: black;
+            color: white;
+        }
+
+        h1, h2 {
+            margin: 20px;
+        }
+
+        .button-container {
+            margin: 20px;
+        }
+
+        button {
+            padding: 12px 25px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            background-color: orange;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: darkorange;
+        }
+
+        #container {
+            width: 80%;
+            height: 60vh;
+            margin: 20px auto;
+            position: relative;
+            border: 2px solid white;
+            background-color: #333;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #9400D3;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #9400D3, 0 0 40px #9400D3, 0 0 60px #FF00FF;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Interactive Physics Playground</h1>
+    <h2>Total Shapes: <span id="shapeCounter">0</span> | Wall Hits: <span id="wallHitCounter">0</span></h2>
+
+    <div class="button-container">
+        <button id="spawnButton">Spawn Shapes</button>
+        <button id="resetButton">Reset</button>
+        <button id="doubleShapesButton">Double Shapes</button>
+        <button id="changeColorButton">Change Colors</button>
+        <button id="shapeShifterButton">Shape Shifter</button>
+        <button id="partyModeButton">Party Mode</button>
+        <button id="changeSizeButton">Change Size</button>
+    </div>
+
+    <div id="container"></div>
+
+    <script>
+        const container = document.getElementById("container");
+        const shapeCounter = document.getElementById("shapeCounter");
+        const wallHitCounter = document.getElementById("wallHitCounter");
+        let shapes = [];
+        let totalWallHits = 0;
+
+        function updateCounters() {
+            shapeCounter.textContent = shapes.length;
+            wallHitCounter.textContent = totalWallHits;
+        }
+
+        function createShape() {
+            const shape = document.createElement("div");
+            shape.classList.add("shape");
+            shape.style.left = `${Math.random() * (container.clientWidth - 50)}px`;
+            shape.style.top = `${Math.random() * (container.clientHeight - 50)}px`;
+
+            const xSpeed = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 4 + 1);
+            const ySpeed = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 4 + 1);
+
+            container.appendChild(shape);
+            shapes.push({ element: shape, xSpeed, ySpeed });
+            updateCounters();
+        }
+
+        function createOctagon() {
+            const octagon = document.createElement("div");
+            octagon.classList.add("shape");
+            octagon.style.clipPath = "polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)";
+            octagon.style.left = `${Math.random() * (container.clientWidth - 50)}px`;
+            octagon.style.top = `${Math.random() * (container.clientHeight - 50)}px`;
+
+            const xSpeed = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 4 + 1);
+            const ySpeed = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 4 + 1);
+
+            container.appendChild(octagon);
+            shapes.push({ element: octagon, xSpeed, ySpeed });
+            updateCounters();
+        }
+
+        function moveShapes() {
+            shapes.forEach((shapeData) => {
+                const shape = shapeData.element;
+                let x = parseFloat(shape.style.left);
+                let y = parseFloat(shape.style.top);
+
+                x += shapeData.xSpeed;
+                y += shapeData.ySpeed;
+
+                if (x <= 0 || x >= container.clientWidth - 50) {
+                    shapeData.xSpeed *= -1; // Reverse direction on X axis
+                    totalWallHits++;
+                }
+                if (y <= 0 || y >= container.clientHeight - 50) {
+                    shapeData.ySpeed *= -1; // Reverse direction on Y axis
+                    totalWallHits++;
+                }
+
+                shape.style.left = `${x}px`;
+                shape.style.top = `${y}px`;
+            });
+
+            updateCounters();
+            requestAnimationFrame(moveShapes);
+        }
+
+        document.getElementById("spawnButton").addEventListener("click", () => {
+            for (let i = 0; i < 5; i++) {
+                createShape();
+            }
+        });
+
+        document.getElementById("resetButton").addEventListener("click", () => {
+            shapes.forEach(shape => shape.element.remove());
+            shapes = [];
+            totalWallHits = 0;
+            updateCounters();
+        });
+
+        document.getElementById("doubleShapesButton").addEventListener("click", () => {
+            const currentShapes = [...shapes];
+            currentShapes.forEach(() => createShape());
+        });
+
+        document.getElementById("changeColorButton").addEventListener("click", () => {
+            shapes.forEach(shapeData => {
+                const shape = shapeData.element;
+                shape.style.backgroundColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+                shape.style.boxShadow = `0 0 20px ${shape.style.backgroundColor}, 0 0 40px ${shape.style.backgroundColor}, 0 0 60px ${shape.style.backgroundColor}`;
+            });
+        });
+
+        document.getElementById("shapeShifterButton").addEventListener("click", () => {
+            // Existing shapes change shape
+            shapes.forEach(shapeData => {
+                const shape = shapeData.element;
+                shape.style.borderRadius = Math.random() > 0.5 ? "0" : "50%";
+            });
+
+            // Add new octagons
+            for (let i = 0; i < 3; i++) { // Adds 3 new octagons each time Shape Shifter is triggered
+                createOctagon();
+            }
+        });
+
+        document.getElementById("partyModeButton").addEventListener("click", () => {
+            setInterval(() => {
+                shapes.forEach(shapeData => {
+                    const shape = shapeData.element;
+                    shape.style.backgroundColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+                    shape.style.boxShadow = `0 0 20px ${shape.style.backgroundColor}, 0 0 40px ${shape.style.backgroundColor}, 0 0 60px ${shape.style.backgroundColor}`;
+                });
+            }, 500);
+        });
+
+        document.getElementById("changeSizeButton").addEventListener("click", () => {
+            shapes.forEach(shapeData => {
+                const shape = shapeData.element;
+                shape.style.width = `${Math.random() * 100 + 10}px`;
+                shape.style.height = `${Math.random() * 100 + 10}px`;
+            });
+        });
+
+        moveShapes();
+    </script>
+</body>
+
+</html>
